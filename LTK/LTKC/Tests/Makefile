@@ -16,7 +16,7 @@
 ############################################################################
 
 LIBDIR=../Library
-XML2DIR=../../opensource/include/libxml2
+XML2DIR=/usr/include/libxml2
 INCL = -I$(LIBDIR) -I$(XML2DIR)
 
 #CFLAGS = -O -Wall $(INCL)
@@ -25,7 +25,6 @@ CC          = gcc
 CFLAGS      = -g -Wall $(INCL)
 
 LTKC_LIB = $(LIBDIR)/libltkc.a
-XML2_LIB = ../../opensource/lib/libxml2.a
 LTKC_HDRS = \
 	$(LIBDIR)/ltkc.h		\
 	$(LIBDIR)/ltkc_base.h		\
@@ -50,7 +49,7 @@ xml2llrp.o : xml2llrp.c $(LTKC_HDRS)
 	$(CC) -c $(CFLAGS) xml2llrp.c -o xml2llrp.o
 
 xml2llrp : xml2llrp.o $(LTKC_LIB) $(XML2_LIB)
-	$(CC) $(CFLAGS) -o xml2llrp xml2llrp.o $(LTKC_LIB) $(XML2_LIB)
+	$(CC) $(CFLAGS) -o xml2llrp xml2llrp.o $(LTKC_LIB) -lxml2
 
 dx201 : dx201.o $(LTKC_LIB)
 	$(CC) $(CFLAGS) -o dx201 dx201.o $(LTKC_LIB)
