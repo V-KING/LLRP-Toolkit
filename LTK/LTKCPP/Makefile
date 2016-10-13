@@ -35,5 +35,4 @@ clean:
 	cd Tests;       make clean
 	cd Examples;    make clean
 	cd Release;     make clean
-	cd VS_LTKCPP;   make clean
 	rm -f *.o *.core core.[0-9]*
