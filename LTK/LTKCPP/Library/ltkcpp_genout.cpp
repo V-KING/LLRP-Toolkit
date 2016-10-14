@@ -22,37 +22,34 @@
 #include "ltkcpp.h"
 
 
-namespace LLRP
-{
+namespace LLRP {
 #include "out_ltkcpp.inc"
 
 
-static char     ident[] = {
-    "$" "Id: libltkcpp "
-    STRINGIFY(LTKCPP_VERSION_STR)
-    "  Built: "
-    __DATE__
-    " "
-    __TIME__
-    " $"
-};
+    static char ident[] = {
+        "$" "Id: libltkcpp "
+        STRINGIFY(LTKCPP_VERSION_STR)
+        "  Built: "
+        __DATE__
+        " "
+        __TIME__
+        " $"
+    };
 
+    /**
+     ****************************************************************************
+     ** @brief Gets the type registry for the LTKCPP
+     ** 
+     ** @return CTypeRegistry The Type registry.
+     **/
+    CTypeRegistry *
+    getTheTypeRegistry(void) {
+        CTypeRegistry * pTypeRegistry = new CTypeRegistry();
 
-/**
- ****************************************************************************
- ** @brief Gets the type registry for the LTKCPP
- ** 
- ** @return CTypeRegistry The Type registry.
- **/
-CTypeRegistry *
-getTheTypeRegistry (void)
-{
-    CTypeRegistry *         pTypeRegistry = new CTypeRegistry();
+        enrollCoreTypesIntoRegistry(pTypeRegistry);
 
-    enrollCoreTypesIntoRegistry (pTypeRegistry);
-
-    return pTypeRegistry;
-}
+        return pTypeRegistry;
+    }
 
 
 }; /* namespace LLRP */

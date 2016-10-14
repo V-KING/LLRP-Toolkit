@@ -18,7 +18,7 @@
 #CPPFLAGS       = -O -Wall -I..
 AR              = ar
 CXX             = g++
-CPPFLAGS        = -g -Wall -I..
+CPPFLAGS        = -std=c++14 -g -Wall -I.. -Dlinux
 
 LLRPORGDEF          = ../../../Definitions/LLRP.org/LLRPOrgExampleDef.xml
 

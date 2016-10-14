@@ -52,8 +52,8 @@
  **
  *****************************************************************************/
 
-
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 #ifdef linux
 #include <unistd.h>
 #endif
@@ -62,112 +62,109 @@
 
 using namespace LLRP;
 
-
-class CMyApplication
-{
-  public:
+class CMyApplication {
+public:
     /** Verbose level, incremented by each -v on command line */
-    int                         m_Verbose;
+    int m_Verbose;
 
     /** ModeIndex requested [012345], -1 means no mode given
      ** and use the default */
-    int                         m_ModeIndex;
+    int m_ModeIndex;
     /** Quiet flag -q, don't print the tag reports */
-    int                         m_Quiet;
+    int m_Quiet;
     /** Count of tag reports (RO_ACCESS_REPORT) */
-    int                         m_nTagReport;
+    int m_nTagReport;
 
     /** Connection to the LLRP reader */
-    CConnection *               m_pConnectionToReader;
+    CConnection * m_pConnectionToReader;
 
     inline
-    CMyApplication (void)
-     : m_Verbose(0), m_ModeIndex(-1), m_Quiet(0),
-       m_nTagReport(0), m_pConnectionToReader(NULL)
-    {}
+    CMyApplication(void)
+    : m_Verbose(0), m_ModeIndex(-1), m_Quiet(0),
+    m_nTagReport(0), m_pConnectionToReader(NULL) {
+    }
 
     int
-    run (
-      char *                    pReaderHostName);
+    run(
+            char * pReaderHostName);
 
     int
-    checkConnectionStatus (void);
+    checkConnectionStatus(void);
 
     int
-    scrubConfiguration (void);
+    scrubConfiguration(void);
 
     int
-    resetConfigurationToFactoryDefaults (void);
+    resetConfigurationToFactoryDefaults(void);
 
     int
-    deleteAllROSpecs (void);
+    deleteAllROSpecs(void);
 
     int
-    deleteAllAccessSpecs (void);
+    deleteAllAccessSpecs(void);
 
     int
     prepareReader(void);
 
     int
-    getAllCapabilities (void);
+    getAllCapabilities(void);
 
     int
-    getAllConfiguration (void);
+    getAllConfiguration(void);
 
     int
-    configureNotificationStates (void);
+    configureNotificationStates(void);
 
     int
-    addROSpec (void);
+    addROSpec(void);
 
     int
-    enableROSpec (void);
+    enableROSpec(void);
 
     int
-    startAndMonitorOperation (void);
+    startAndMonitorOperation(void);
 
     void
-    printTagReportData (
-      CRO_ACCESS_REPORT *       pRO_ACCESS_REPORT);
+    printTagReportData(
+            CRO_ACCESS_REPORT * pRO_ACCESS_REPORT);
 
     void
-    printOneTagReportData (
-      CTagReportData *          pTagReportData);
+    printOneTagReportData(
+            CTagReportData * pTagReportData);
 
     int
-    checkLLRPStatus (
-      CLLRPStatus *             pLLRPStatus,
-      char *                    pWhatStr);
+    checkLLRPStatus(
+            CLLRPStatus * pLLRPStatus,
+            char * pWhatStr);
 
     CMessage *
-    transact (
-      CMessage *                pSendMsg);
+    transact(
+            CMessage * pSendMsg);
 
     CMessage *
-    recvMessage (
-      int                       nMaxMS);
+    recvMessage(
+            int nMaxMS);
 
     int
-    sendMessage (
-      CMessage *                pSendMsg);
+    sendMessage(
+            CMessage * pSendMsg);
 
     void
-    printXMLMessage (
-      CMessage *                pMessage);
+    printXMLMessage(
+            CMessage * pMessage);
 };
 
 
 /* BEGIN forward declarations */
 int
-main (
-  int                           ac,
-  char *                        av[]);
+main(
+        int ac,
+        char * av[]);
 
 void
-usage (
-  char *                        pProgName);
+usage(
+        char * pProgName);
 /* END forward declarations */
-
 
 /**
  *****************************************************************************
@@ -191,62 +188,54 @@ usage (
  *****************************************************************************/
 
 int
-main (
-  int                           ac,
-  char *                        av[])
-{
-    CMyApplication              myApp;
-    char *                      pReaderHostName;
-    int                         rc;
+main(
+        int ac,
+        char * av[]) {
+    CMyApplication myApp;
+    char * pReaderHostName;
+    int rc;
 #ifdef linux
-    char *                      pMemHiwatAtStart = (char*)sbrk(0);
+    char * pMemHiwatAtStart = (char*) sbrk(0);
 #endif
 
     /*
      * Process comand arguments, determine reader name
      * and verbosity level.
      */
-    if(ac == 2)
-    {
+    if (ac == 2) {
         pReaderHostName = av[1];
-    }
-    else if(ac == 3)
-    {
-        char *                  p = av[1];
+    } else if (ac == 3) {
+        char * p = av[1];
 
-        while(*p)
-        {
-            switch(*p++)
-            {
-            case '-':   /* linux conventional option warn char */
-            case '/':   /* Windows/DOS conventional option warn char */
-                break;
+        while (*p) {
+            switch (*p++) {
+                case '-': /* linux conventional option warn char */
+                case '/': /* Windows/DOS conventional option warn char */
+                    break;
 
-            case 'v':
-            case 'V':
-                myApp.m_Verbose++;
-                break;
+                case 'v':
+                case 'V':
+                    myApp.m_Verbose++;
+                    break;
 
-            case 'q':
-            case 'Q':
-                myApp.m_Quiet++;
-                break;
+                case 'q':
+                case 'Q':
+                    myApp.m_Quiet++;
+                    break;
 
-            case '0': case '1': case '2': case '3': case '4': case '5':
-                myApp.m_ModeIndex = p[-1] - '0';
-                break;
+                case '0': case '1': case '2': case '3': case '4': case '5':
+                    myApp.m_ModeIndex = p[-1] - '0';
+                    break;
 
-            default:
-                usage(av[0]);
-                /* no return */
-                break;
+                default:
+                    usage(av[0]);
+                    /* no return */
+                    break;
             }
         }
 
         pReaderHostName = av[2];
-    }
-    else
-    {
+    } else {
         usage(av[0]);
         /* no return */
     }
@@ -260,27 +249,23 @@ main (
 
 #ifdef linux
     {
-        char *              pMemHiwatAtEnd = (char*)sbrk(0);
+        char * pMemHiwatAtEnd = (char*) sbrk(0);
 
         printf("INFO: Needed %d bytes of heap\n",
-            pMemHiwatAtEnd - pMemHiwatAtStart);
+                pMemHiwatAtEnd - pMemHiwatAtStart);
     }
 #endif
 
     /*
      * Exit with the right status.
      */
-    if(0 == rc)
-    {
+    if (0 == rc) {
         exit(0);
-    }
-    else
-    {
+    } else {
         exit(2);
     }
     /*NOTREACHED*/
 }
-
 
 /**
  *****************************************************************************
@@ -294,9 +279,8 @@ main (
  *****************************************************************************/
 
 void
-usage (
-  char *                        pProgName)
-{
+usage(
+        char * pProgName) {
 #ifdef linux
     printf("Usage: %s [-v[v]] READERHOSTNAME\n", pProgName);
     printf("\n");
@@ -309,7 +293,6 @@ usage (
 #endif /* WIN32 */
     exit(1);
 }
-
 
 /**
  *****************************************************************************
@@ -341,20 +324,18 @@ usage (
  *****************************************************************************/
 
 int
-CMyApplication::run (
-  char *                        pReaderHostName)
-{
-    CTypeRegistry *             pTypeRegistry;
-    CConnection *               pConn;
-    int                         rc;
+CMyApplication::run(
+        char * pReaderHostName) {
+    CTypeRegistry * pTypeRegistry;
+    CConnection * pConn;
+    int rc;
 
     /*
      * Allocate the type registry. This is needed
      * by the connection to decode.
      */
     pTypeRegistry = getTheTypeRegistry();
-    if(NULL == pTypeRegistry)
-    {
+    if (NULL == pTypeRegistry) {
         printf("ERROR: getTheTypeRegistry failed\n");
         return -1;
     }
@@ -365,9 +346,8 @@ CMyApplication::run (
      * The connection object is ready for business
      * but not actually connected to the reader yet.
      */
-    pConn = new CConnection(pTypeRegistry, 32u*1024u);
-    if(NULL == pConn)
-    {
+    pConn = new CConnection(pTypeRegistry, 32u * 1024u);
+    if (NULL == pConn) {
         printf("ERROR: new CConnection failed\n");
         return -2;
     }
@@ -375,14 +355,12 @@ CMyApplication::run (
     /*
      * Open the connection to the reader
      */
-    if(m_Verbose)
-    {
-        printf ("INFO: Connecting to %s....\n", pReaderHostName);
+    if (m_Verbose) {
+        printf("INFO: Connecting to %s....\n", pReaderHostName);
     }
 
     rc = pConn->openConnectionToReader(pReaderHostName);
-    if(0 != rc)
-    {
+    if (0 != rc) {
         printf("ERROR: connect: %s (%d)\n", pConn->getConnectError(), rc);
         delete pConn;
         return -3;
@@ -394,9 +372,8 @@ CMyApplication::run (
      */
     m_pConnectionToReader = pConn;
 
-    if(m_Verbose)
-    {
-        printf ("INFO: Connected, checking status....\n");
+    if (m_Verbose) {
+        printf("INFO: Connected, checking status....\n");
     }
 
     /*
@@ -405,17 +382,13 @@ CMyApplication::run (
      * Each routine prints messages per verbose level.
      */
     rc = 1;
-    if(0 == checkConnectionStatus())
-    {
+    if (0 == checkConnectionStatus()) {
         rc = 2;
-        if(0 == scrubConfiguration())
-        {
+        if (0 == scrubConfiguration()) {
             rc = 3;
-            if(0 == prepareReader())
-            {
+            if (0 == prepareReader()) {
                 rc = 4;
-                if(0 == startAndMonitorOperation())
-                {
+                if (0 == startAndMonitorOperation()) {
                     rc = 0;
                 }
             }
@@ -425,17 +398,15 @@ CMyApplication::run (
              * in a clean state for next use. This is best
              * effort and no checking of the result is done.
              */
-            if(m_Verbose)
-            {
+            if (m_Verbose) {
                 printf("INFO: Clean up reader configuration...\n");
             }
             scrubConfiguration();
         }
     }
 
-    if(m_Verbose)
-    {
-        printf ("INFO: Finished\n");
+    if (m_Verbose) {
+        printf("INFO: Finished\n");
     }
 
     /*
@@ -455,8 +426,7 @@ CMyApplication::run (
      * total. With the -v command option we're probably reporting tags
      * and a final count.
      */
-    if(m_Verbose || m_Quiet)
-    {
+    if (m_Verbose || m_Quiet) {
         printf("INFO: %d Tag reports\n", m_nTagReport);
     }
 
@@ -466,7 +436,6 @@ CMyApplication::run (
 
     return rc;
 }
-
 
 /**
  *****************************************************************************
@@ -499,12 +468,11 @@ CMyApplication::run (
  *****************************************************************************/
 
 int
-CMyApplication::checkConnectionStatus (void)
-{
-    CMessage *                  pMessage;
+CMyApplication::checkConnectionStatus(void) {
+    CMessage * pMessage;
     CREADER_EVENT_NOTIFICATION *pNtf;
     CReaderEventNotificationData *pNtfData;
-    CConnectionAttemptEvent *   pEvent;
+    CConnectionAttemptEvent * pEvent;
 
     /*
      * Expect the notification within 10 seconds.
@@ -515,8 +483,7 @@ CMyApplication::checkConnectionStatus (void)
     /*
      * recvMessage() returns NULL if something went wrong.
      */
-    if(NULL == pMessage)
-    {
+    if (NULL == pMessage) {
         /* recvMessage already tattled */
         goto fail;
     }
@@ -526,8 +493,7 @@ CMyApplication::checkConnectionStatus (void)
      * The type label (pointer) in the message should be
      * the type descriptor for READER_EVENT_NOTIFICATION.
      */
-    if(&CREADER_EVENT_NOTIFICATION::s_typeDescriptor != pMessage->m_pType)
-    {
+    if (&CREADER_EVENT_NOTIFICATION::s_typeDescriptor != pMessage->m_pType) {
         goto fail;
     }
 
@@ -537,8 +503,7 @@ CMyApplication::checkConnectionStatus (void)
      */
     pNtf = (CREADER_EVENT_NOTIFICATION *) pMessage;
     pNtfData = pNtf->getReaderEventNotificationData();
-    if(NULL == pNtfData)
-    {
+    if (NULL == pNtfData) {
         goto fail;
     }
 
@@ -546,8 +511,7 @@ CMyApplication::checkConnectionStatus (void)
      * The ConnectionAttemptEvent parameter must be present.
      */
     pEvent = pNtfData->getConnectionAttemptEvent();
-    if(NULL == pEvent)
-    {
+    if (NULL == pEvent) {
         goto fail;
     }
 
@@ -555,8 +519,7 @@ CMyApplication::checkConnectionStatus (void)
      * The status in the ConnectionAttemptEvent parameter
      * must indicate connection success.
      */
-    if(ConnectionAttemptStatusType_Success != pEvent->getStatus())
-    {
+    if (ConnectionAttemptStatusType_Success != pEvent->getStatus()) {
         goto fail;
     }
 
@@ -565,8 +528,7 @@ CMyApplication::checkConnectionStatus (void)
      */
     delete pMessage;
 
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: Connection status OK\n");
     }
 
@@ -575,7 +537,7 @@ CMyApplication::checkConnectionStatus (void)
      */
     return 0;
 
-  fail:
+fail:
     /*
      * Something went wrong. Tattle. Clean up. Return error.
      */
@@ -583,7 +545,6 @@ CMyApplication::checkConnectionStatus (void)
     delete pMessage;
     return -1;
 }
-
 
 /**
  *****************************************************************************
@@ -609,26 +570,21 @@ CMyApplication::checkConnectionStatus (void)
  *****************************************************************************/
 
 int
-CMyApplication::scrubConfiguration (void)
-{
-    if(0 != resetConfigurationToFactoryDefaults())
-    {
+CMyApplication::scrubConfiguration(void) {
+    if (0 != resetConfigurationToFactoryDefaults()) {
         return -1;
     }
 
-    if(0 != deleteAllROSpecs())
-    {
+    if (0 != deleteAllROSpecs()) {
         return -2;
     }
 
-    if(0 != deleteAllAccessSpecs())
-    {
+    if (0 != deleteAllAccessSpecs()) {
         return -3;
     }
 
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -651,10 +607,9 @@ CMyApplication::scrubConfiguration (void)
  *****************************************************************************/
 
 int
-CMyApplication::resetConfigurationToFactoryDefaults (void)
-{
-    CSET_READER_CONFIG *        pCmd;
-    CMessage *                  pRspMsg;
+CMyApplication::resetConfigurationToFactoryDefaults(void) {
+    CSET_READER_CONFIG * pCmd;
+    CMessage * pRspMsg;
     CSET_READER_CONFIG_RESPONSE *pRsp;
 
     /*
@@ -677,8 +632,7 @@ CMyApplication::resetConfigurationToFactoryDefaults (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -691,9 +645,8 @@ CMyApplication::resetConfigurationToFactoryDefaults (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(),
-                        "resetConfigurationToFactoryDefaults"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(),
+            "resetConfigurationToFactoryDefaults")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -707,8 +660,7 @@ CMyApplication::resetConfigurationToFactoryDefaults (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: Configuration reset to factory defaults\n");
     }
 
@@ -717,7 +669,6 @@ CMyApplication::resetConfigurationToFactoryDefaults (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -739,18 +690,17 @@ CMyApplication::resetConfigurationToFactoryDefaults (void)
  *****************************************************************************/
 
 int
-CMyApplication::deleteAllROSpecs (void)
-{
-    CDELETE_ROSPEC *            pCmd;
-    CMessage *                  pRspMsg;
-    CDELETE_ROSPEC_RESPONSE *   pRsp;
+CMyApplication::deleteAllROSpecs(void) {
+    CDELETE_ROSPEC * pCmd;
+    CMessage * pRspMsg;
+    CDELETE_ROSPEC_RESPONSE * pRsp;
 
     /*
      * Compose the command message
      */
     pCmd = new CDELETE_ROSPEC();
     pCmd->setMessageID(102);
-    pCmd->setROSpecID(0);               /* All */
+    pCmd->setROSpecID(0); /* All */
 
     /*
      * Send the message, expect the response of certain type
@@ -765,8 +715,7 @@ CMyApplication::deleteAllROSpecs (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -779,8 +728,7 @@ CMyApplication::deleteAllROSpecs (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "deleteAllROSpecs"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "deleteAllROSpecs")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -794,8 +742,7 @@ CMyApplication::deleteAllROSpecs (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: All ROSpecs are deleted\n");
     }
 
@@ -804,7 +751,6 @@ CMyApplication::deleteAllROSpecs (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -826,10 +772,9 @@ CMyApplication::deleteAllROSpecs (void)
  *****************************************************************************/
 
 int
-CMyApplication::deleteAllAccessSpecs (void)
-{
-    CDELETE_ACCESSSPEC *        pCmd;
-    CMessage *                  pRspMsg;
+CMyApplication::deleteAllAccessSpecs(void) {
+    CDELETE_ACCESSSPEC * pCmd;
+    CMessage * pRspMsg;
     CDELETE_ACCESSSPEC_RESPONSE *pRsp;
 
     /*
@@ -837,7 +782,7 @@ CMyApplication::deleteAllAccessSpecs (void)
      */
     pCmd = new CDELETE_ACCESSSPEC();
     pCmd->setMessageID(103);
-    pCmd->setAccessSpecID(0);           /* All */
+    pCmd->setAccessSpecID(0); /* All */
 
     /*
      * Send the message, expect the response of certain type
@@ -852,8 +797,7 @@ CMyApplication::deleteAllAccessSpecs (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -866,8 +810,7 @@ CMyApplication::deleteAllAccessSpecs (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "deleteAllAccessSpecs"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "deleteAllAccessSpecs")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -881,8 +824,7 @@ CMyApplication::deleteAllAccessSpecs (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: All AccessSpecs are deleted\n");
     }
 
@@ -891,7 +833,6 @@ CMyApplication::deleteAllAccessSpecs (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -922,41 +863,33 @@ CMyApplication::deleteAllAccessSpecs (void)
  *****************************************************************************/
 
 int
-CMyApplication::prepareReader(void)
-{
-    if(0 != getAllCapabilities())
-    {
+CMyApplication::prepareReader(void) {
+    if (0 != getAllCapabilities()) {
         return -1;
     }
 
-    if(0 != getAllConfiguration())
-    {
+    if (0 != getAllConfiguration()) {
         return -2;
     }
 
-    if(0 != configureNotificationStates())
-    {
+    if (0 != configureNotificationStates()) {
         return -3;
     }
 
-    if(0 != getAllConfiguration())
-    {
+    if (0 != getAllConfiguration()) {
         return -4;
     }
 
-    if(0 != addROSpec())
-    {
+    if (0 != addROSpec()) {
         return -5;
     }
 
-    if(0 != enableROSpec())
-    {
+    if (0 != enableROSpec()) {
         return -6;
     }
 
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -981,10 +914,9 @@ CMyApplication::prepareReader(void)
  *****************************************************************************/
 
 int
-CMyApplication::getAllCapabilities (void)
-{
-    CGET_READER_CAPABILITIES *  pCmd;
-    CMessage *                  pRspMsg;
+CMyApplication::getAllCapabilities(void) {
+    CGET_READER_CAPABILITIES * pCmd;
+    CMessage * pRspMsg;
     CGET_READER_CAPABILITIES_RESPONSE *pRsp;
 
     /*
@@ -1007,8 +939,7 @@ CMyApplication::getAllCapabilities (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -1021,8 +952,7 @@ CMyApplication::getAllCapabilities (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "getAllCapabilities"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "getAllCapabilities")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -1036,8 +966,7 @@ CMyApplication::getAllCapabilities (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: Got capabilities\n");
     }
 
@@ -1046,7 +975,6 @@ CMyApplication::getAllCapabilities (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -1071,10 +999,9 @@ CMyApplication::getAllCapabilities (void)
  *****************************************************************************/
 
 int
-CMyApplication::getAllConfiguration (void)
-{
-    CGET_READER_CONFIG *        pCmd;
-    CMessage *                  pRspMsg;
+CMyApplication::getAllConfiguration(void) {
+    CGET_READER_CONFIG * pCmd;
+    CMessage * pRspMsg;
     CGET_READER_CONFIG_RESPONSE *pRsp;
 
     /*
@@ -1097,8 +1024,7 @@ CMyApplication::getAllConfiguration (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -1111,8 +1037,7 @@ CMyApplication::getAllConfiguration (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "getAllConfiguration"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "getAllConfiguration")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -1126,8 +1051,7 @@ CMyApplication::getAllConfiguration (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: Got configuration\n");
     }
 
@@ -1136,7 +1060,6 @@ CMyApplication::getAllConfiguration (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -1203,43 +1126,42 @@ CMyApplication::getAllConfiguration (void)
  *****************************************************************************/
 
 int
-CMyApplication::configureNotificationStates (void)
-{
-    CEventNotificationState *   pENHop = new CEventNotificationState();
+CMyApplication::configureNotificationStates(void) {
+    CEventNotificationState * pENHop = new CEventNotificationState();
     pENHop->setEventType(NotificationEventType_Upon_Hopping_To_Next_Channel);
     pENHop->setNotificationState(TRUE);
 
-    CEventNotificationState *   pENGPI = new CEventNotificationState();
+    CEventNotificationState * pENGPI = new CEventNotificationState();
     pENGPI->setEventType(NotificationEventType_GPI_Event);
     pENGPI->setNotificationState(FALSE);
 
-    CEventNotificationState *   pENROSpec = new CEventNotificationState();
+    CEventNotificationState * pENROSpec = new CEventNotificationState();
     pENROSpec->setEventType(NotificationEventType_ROSpec_Event);
     pENROSpec->setNotificationState(TRUE);
 
-    CEventNotificationState *   pENBufWarn = new CEventNotificationState();
+    CEventNotificationState * pENBufWarn = new CEventNotificationState();
     pENBufWarn->setEventType(NotificationEventType_Report_Buffer_Fill_Warning);
     pENBufWarn->setNotificationState(TRUE);
 
-    CEventNotificationState *   pENExcept = new CEventNotificationState();
+    CEventNotificationState * pENExcept = new CEventNotificationState();
     pENExcept->setEventType(NotificationEventType_Reader_Exception_Event);
     pENExcept->setNotificationState(TRUE);
 
-    CEventNotificationState *   pENSurvey = new CEventNotificationState();
+    CEventNotificationState * pENSurvey = new CEventNotificationState();
     pENSurvey->setEventType(NotificationEventType_RFSurvey_Event);
     pENSurvey->setNotificationState(FALSE);
 
-    CEventNotificationState *   pENAISpec = new CEventNotificationState();
+    CEventNotificationState * pENAISpec = new CEventNotificationState();
     pENAISpec->setEventType(NotificationEventType_AISpec_Event);
     pENAISpec->setNotificationState(TRUE);
 
-    CEventNotificationState *   pENAISpecDetails
-                                    = new CEventNotificationState();
+    CEventNotificationState * pENAISpecDetails
+            = new CEventNotificationState();
     pENAISpecDetails->setEventType(
             NotificationEventType_AISpec_Event_With_Details);
     pENAISpecDetails->setNotificationState(FALSE);
 
-    CEventNotificationState *   pENAnt = new CEventNotificationState();
+    CEventNotificationState * pENAnt = new CEventNotificationState();
     pENAnt->setEventType(NotificationEventType_Antenna_Event);
     pENAnt->setNotificationState(TRUE);
 
@@ -1255,11 +1177,11 @@ CMyApplication::configureNotificationStates (void)
     pReaderEventNotificationSpec->addEventNotificationState(pENSurvey);
     pReaderEventNotificationSpec->addEventNotificationState(pENAISpec);
     pReaderEventNotificationSpec->addEventNotificationState(
-                pENAISpecDetails);
+            pENAISpecDetails);
     pReaderEventNotificationSpec->addEventNotificationState(pENAnt);
 
-    CSET_READER_CONFIG *        pCmd;
-    CMessage *                  pRspMsg;
+    CSET_READER_CONFIG * pCmd;
+    CMessage * pRspMsg;
     CSET_READER_CONFIG_RESPONSE *pRsp;
 
     /*
@@ -1287,8 +1209,7 @@ CMyApplication::configureNotificationStates (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -1301,9 +1222,8 @@ CMyApplication::configureNotificationStates (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(),
-                    "configureNotificationStates"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(),
+            "configureNotificationStates")) {
         delete pRspMsg;
         return -1;
     }
@@ -1316,8 +1236,7 @@ CMyApplication::configureNotificationStates (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: Notifications are configured\n");
     }
 
@@ -1326,7 +1245,6 @@ CMyApplication::configureNotificationStates (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -1419,78 +1337,77 @@ CMyApplication::configureNotificationStates (void)
  *****************************************************************************/
 
 int
-CMyApplication::addROSpec (void)
-{
-    CROSpecStartTrigger *       pROSpecStartTrigger =
-                                    new CROSpecStartTrigger();
+CMyApplication::addROSpec(void) {
+    CROSpecStartTrigger * pROSpecStartTrigger =
+            new CROSpecStartTrigger();
     pROSpecStartTrigger->setROSpecStartTriggerType(
-                                ROSpecStartTriggerType_Null);
+            ROSpecStartTriggerType_Null);
 
-    CROSpecStopTrigger *        pROSpecStopTrigger = new CROSpecStopTrigger();
+    CROSpecStopTrigger * pROSpecStopTrigger = new CROSpecStopTrigger();
     pROSpecStopTrigger->setROSpecStopTriggerType(ROSpecStopTriggerType_Null);
-    pROSpecStopTrigger->setDurationTriggerValue(0);     /* n/a */
+    pROSpecStopTrigger->setDurationTriggerValue(0); /* n/a */
 
-    CROBoundarySpec *           pROBoundarySpec = new CROBoundarySpec();
+    CROBoundarySpec * pROBoundarySpec = new CROBoundarySpec();
     pROBoundarySpec->setROSpecStartTrigger(pROSpecStartTrigger);
     pROBoundarySpec->setROSpecStopTrigger(pROSpecStopTrigger);
 
 #if 1
-    CAISpecStopTrigger *        pAISpecStopTrigger = new CAISpecStopTrigger();
+    CAISpecStopTrigger * pAISpecStopTrigger = new CAISpecStopTrigger();
     pAISpecStopTrigger->setAISpecStopTriggerType(
-                            AISpecStopTriggerType_Duration);
+            AISpecStopTriggerType_Duration);
     pAISpecStopTrigger->setDurationTrigger(30000);
 #else
-    CTagObservationTrigger *    pTagObservationTrigger =
-                                    new CTagObservationTrigger();
-    pTagObservationTrigger->setTriggerType (
- TagObservationTriggerType_Upon_Seeing_No_More_New_Tags_For_Tms_Or_Timeout);
-    pTagObservationTrigger->setNumberOfTags(0);         /* unlimited */
-    pTagObservationTrigger->setNumberOfAttempts(0);     /* n/a */
-    pTagObservationTrigger->setT(3500);                 /* 3.5 sec */
-    pTagObservationTrigger->setTimeout(12500);          /* 12.5 sec */
+    CTagObservationTrigger * pTagObservationTrigger =
+            new CTagObservationTrigger();
+    pTagObservationTrigger->setTriggerType(
+            TagObservationTriggerType_Upon_Seeing_No_More_New_Tags_For_Tms_Or_Timeout);
+    pTagObservationTrigger->setNumberOfTags(0); /* unlimited */
+    pTagObservationTrigger->setNumberOfAttempts(0); /* n/a */
+    pTagObservationTrigger->setT(3500); /* 3.5 sec */
+    pTagObservationTrigger->setTimeout(12500); /* 12.5 sec */
 
-    CAISpecStopTrigger *        pAISpecStopTrigger = new CAISpecStopTrigger();
+    CAISpecStopTrigger * pAISpecStopTrigger = new CAISpecStopTrigger();
     pAISpecStopTrigger->setAISpecStopTriggerType(
-                            AISpecStopTriggerType_Tag_Observation);
+            AISpecStopTriggerType_Tag_Observation);
     pAISpecStopTrigger->setDurationTrigger(0);
     pAISpecStopTrigger->setTagObservationTrigger(pTagObservationTrigger);
 #endif
 
-    CC1G2SingulationControl *   pC1G2SingulationControl =
-                                    new CC1G2SingulationControl();
+    CC1G2SingulationControl * pC1G2SingulationControl =
+            new CC1G2SingulationControl();
     pC1G2SingulationControl->setSession(2);
     pC1G2SingulationControl->setTagPopulation(32);
 
-    CC1G2InventoryCommand *     pC1G2InventoryCommand =
-                                    new CC1G2InventoryCommand();
+    CC1G2InventoryCommand * pC1G2InventoryCommand =
+            new CC1G2InventoryCommand();
     pC1G2InventoryCommand->setC1G2SingulationControl(
-                                        pC1G2SingulationControl);
+            pC1G2SingulationControl);
     /*
      * C1G2RFControl might be set below if a m_ModeIndex was
      * given on the command line.
      */
-    CAntennaConfiguration *     pAntennaConfiguration =
-                                    new CAntennaConfiguration();
-    pAntennaConfiguration->addAirProtocolInventoryCommandSettings (
-                                        pC1G2InventoryCommand);
+    CAntennaConfiguration * pAntennaConfiguration =
+            new CAntennaConfiguration();
+    pAntennaConfiguration->addAirProtocolInventoryCommandSettings(
+            pC1G2InventoryCommand);
 
-    CInventoryParameterSpec *   pInventoryParameterSpec =
-                                    new CInventoryParameterSpec();
+    CInventoryParameterSpec * pInventoryParameterSpec =
+            new CInventoryParameterSpec();
     pInventoryParameterSpec->setInventoryParameterSpecID(1234);
     pInventoryParameterSpec->setProtocolID(AirProtocols_EPCGlobalClass1Gen2);
-    pInventoryParameterSpec->addAntennaConfiguration (
-                                        pAntennaConfiguration);
+    pInventoryParameterSpec->addAntennaConfiguration(
+            pAntennaConfiguration);
 
-    llrp_u16v_t                 AntennaIDs = llrp_u16v_t(1);
-    AntennaIDs.m_pValue[0] = 0;         /* All */
+    llrp_u16v_t AntennaIDs = llrp_u16v_t(1);
+    AntennaIDs.m_pValue[0] = 0; /* All */
 
-    CAISpec *                   pAISpec = new CAISpec();
+    CAISpec * pAISpec = new CAISpec();
     pAISpec->setAntennaIDs(AntennaIDs);
     pAISpec->setAISpecStopTrigger(pAISpecStopTrigger);
     pAISpec->addInventoryParameterSpec(pInventoryParameterSpec);
 
     CTagReportContentSelector * pTagReportContentSelector =
-                                    new CTagReportContentSelector();
+            new CTagReportContentSelector();
     pTagReportContentSelector->setEnableROSpecID(FALSE);
     pTagReportContentSelector->setEnableSpecIndex(FALSE);
     pTagReportContentSelector->setEnableInventoryParameterSpecID(FALSE);
@@ -1502,13 +1419,13 @@ CMyApplication::addROSpec (void)
     pTagReportContentSelector->setEnableTagSeenCount(TRUE);
     pTagReportContentSelector->setEnableAccessSpecID(FALSE);
 
-    CROReportSpec *             pROReportSpec = new CROReportSpec();
+    CROReportSpec * pROReportSpec = new CROReportSpec();
     pROReportSpec->setROReportTrigger(
             ROReportTriggerType_Upon_N_Tags_Or_End_Of_ROSpec);
-    pROReportSpec->setN(1);         /* Report every singulation */
+    pROReportSpec->setN(1); /* Report every singulation */
     pROReportSpec->setTagReportContentSelector(pTagReportContentSelector);
 
-    CROSpec *                   pROSpec = new CROSpec();
+    CROSpec * pROSpec = new CROSpec();
     pROSpec->setROSpecID(123);
     pROSpec->setPriority(0);
     pROSpec->setCurrentState(ROSpecState_Disabled);
@@ -1516,9 +1433,9 @@ CMyApplication::addROSpec (void)
     pROSpec->addSpecParameter(pAISpec);
     pROSpec->setROReportSpec(pROReportSpec);
 
-    CADD_ROSPEC *               pCmd;
-    CMessage *                  pRspMsg;
-    CADD_ROSPEC_RESPONSE *      pRsp;
+    CADD_ROSPEC * pCmd;
+    CMessage * pRspMsg;
+    CADD_ROSPEC_RESPONSE * pRsp;
 
     /*
      * Compose the command message.
@@ -1536,10 +1453,9 @@ CMyApplication::addROSpec (void)
      * that was prepared, above. The absence of the AntennaConfiguration
      * tells the reader to use the default mode.
      */
-    if(0 <= m_ModeIndex)
-    {
-        CC1G2RFControl *        pC1G2RFControl =
-                                    new CC1G2RFControl();
+    if (0 <= m_ModeIndex) {
+        CC1G2RFControl * pC1G2RFControl =
+                new CC1G2RFControl();
 
         pC1G2RFControl->setModeIndex(m_ModeIndex);
         pC1G2InventoryCommand->setC1G2RFControl(pC1G2RFControl);
@@ -1559,8 +1475,7 @@ CMyApplication::addROSpec (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -1573,8 +1488,7 @@ CMyApplication::addROSpec (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "addROSpec"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "addROSpec")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -1588,8 +1502,7 @@ CMyApplication::addROSpec (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: ROSpec added\n");
     }
 
@@ -1598,7 +1511,6 @@ CMyApplication::addROSpec (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -1618,11 +1530,10 @@ CMyApplication::addROSpec (void)
  *****************************************************************************/
 
 int
-CMyApplication::enableROSpec (void)
-{
-    CENABLE_ROSPEC *            pCmd;
-    CMessage *                  pRspMsg;
-    CENABLE_ROSPEC_RESPONSE *   pRsp;
+CMyApplication::enableROSpec(void) {
+    CENABLE_ROSPEC * pCmd;
+    CMessage * pRspMsg;
+    CENABLE_ROSPEC_RESPONSE * pRsp;
 
     /*
      * Compose the command message
@@ -1644,8 +1555,7 @@ CMyApplication::enableROSpec (void)
     /*
      * transact() returns NULL if something went wrong.
      */
-    if(NULL == pRspMsg)
-    {
+    if (NULL == pRspMsg) {
         /* transact already tattled */
         return -1;
     }
@@ -1658,8 +1568,7 @@ CMyApplication::enableROSpec (void)
     /*
      * Check the LLRPStatus parameter.
      */
-    if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "enableROSpec"))
-    {
+    if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "enableROSpec")) {
         /* checkLLRPStatus already tattled */
         delete pRspMsg;
         return -1;
@@ -1673,8 +1582,7 @@ CMyApplication::enableROSpec (void)
     /*
      * Tattle progress, maybe
      */
-    if(m_Verbose)
-    {
+    if (m_Verbose) {
         printf("INFO: ROSpec enabled\n");
     }
 
@@ -1683,7 +1591,6 @@ CMyApplication::enableROSpec (void)
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -1728,11 +1635,10 @@ CMyApplication::enableROSpec (void)
  *****************************************************************************/
 
 int
-CMyApplication::startAndMonitorOperation (void)
-{
-    CSTART_ROSPEC *             pCmd;
-    int                         bDone = 0;
-    int                         RetVal = 0;
+CMyApplication::startAndMonitorOperation(void) {
+    CSTART_ROSPEC * pCmd;
+    int bDone = 0;
+    int RetVal = 0;
 
     /*
      * Tattle as we start.
@@ -1749,8 +1655,7 @@ CMyApplication::startAndMonitorOperation (void)
     /*
      * Just send the START_ROSPEC message, do not wait for the resposne.
      */
-    if(0 != sendMessage(pCmd))
-    {
+    if (0 != sendMessage(pCmd)) {
         /* sendMessage already tattled */
         return -1;
     }
@@ -1764,9 +1669,8 @@ CMyApplication::startAndMonitorOperation (void)
      * Keep receiving messages until done or until
      * something bad happens.
      */
-    while(!bDone)
-    {
-        CMessage *              pMessage;
+    while (!bDone) {
+        CMessage * pMessage;
         const CTypeDescriptor * pType;
 
         /*
@@ -1775,8 +1679,7 @@ CMyApplication::startAndMonitorOperation (void)
          * hopping events per second.
          */
         pMessage = recvMessage(20000);
-        if(NULL == pMessage)
-        {
+        if (NULL == pMessage) {
             /*
              * Did not receive a message within a reasonable
              * amount of time. recvMessage() already tattled
@@ -1799,8 +1702,7 @@ CMyApplication::startAndMonitorOperation (void)
          * If the status is not good there is no
          * ROSpec running and things are done.
          */
-        if(&CSTART_ROSPEC_RESPONSE::s_typeDescriptor == pType)
-        {
+        if (&CSTART_ROSPEC_RESPONSE::s_typeDescriptor == pType) {
             CSTART_ROSPEC_RESPONSE *pRsp;
 
             /*
@@ -1811,27 +1713,21 @@ CMyApplication::startAndMonitorOperation (void)
             /*
              * Check the LLRPStatus parameter.
              */
-            if(0 != checkLLRPStatus(pRsp->getLLRPStatus(), "startROSpec"))
-            {
+            if (0 != checkLLRPStatus(pRsp->getLLRPStatus(), "startROSpec")) {
                 /* checkLLRPStatus already tattled */
                 RetVal = -3;
                 bDone = 1;
-            }
-            else
-            {
+            } else {
                 /* Good start. Tattle, maybe. */
-                if(m_Verbose)
-                {
+                if (m_Verbose) {
                     printf("INFO: Start command acknowledged\n");
                 }
             }
         }
-
-        /*
-         * Is it a reader event? If so, which ones?
-         */
-        else if(&CREADER_EVENT_NOTIFICATION::s_typeDescriptor == pType)
-        {
+            /*
+             * Is it a reader event? If so, which ones?
+             */
+        else if (&CREADER_EVENT_NOTIFICATION::s_typeDescriptor == pType) {
             CREADER_EVENT_NOTIFICATION *pNtf;
             CReaderEventNotificationData *pNtfData;
 
@@ -1842,34 +1738,30 @@ CMyApplication::startAndMonitorOperation (void)
              * Is there an ROSpecEvent? These tell use when the ROSpec
              * starts and stops. When it stops things are done.
              */
-            if(NULL != pNtfData->getROSpecEvent())
-            {
-                CROSpecEvent *    pROEvent;
+            if (NULL != pNtfData->getROSpecEvent()) {
+                CROSpecEvent * pROEvent;
 
                 pROEvent = pNtfData->getROSpecEvent();
-                switch(pROEvent->getEventType())
-                {
-                default:
-                    printf("ERROR: Unknown RO event type\n");
-                    RetVal = -4;
-                    bDone = 1;
-                    break;
+                switch (pROEvent->getEventType()) {
+                    default:
+                        printf("ERROR: Unknown RO event type\n");
+                        RetVal = -4;
+                        bDone = 1;
+                        break;
 
-                case ROSpecEventType_Start_Of_ROSpec:
-                    if(m_Verbose)
-                    {
-                        printf("INFO: RO running\n");
-                    }
-                    break;
+                    case ROSpecEventType_Start_Of_ROSpec:
+                        if (m_Verbose) {
+                            printf("INFO: RO running\n");
+                        }
+                        break;
 
-                case ROSpecEventType_End_Of_ROSpec:
-                    if(m_Verbose)
-                    {
-                        printf("INFO: RO stopped\n");
-                    }
-                    RetVal = 0;
-                    bDone = 1;
-                    break;
+                    case ROSpecEventType_End_Of_ROSpec:
+                        if (m_Verbose) {
+                            printf("INFO: RO stopped\n");
+                        }
+                        RetVal = 0;
+                        bDone = 1;
+                        break;
                 }
             }
 
@@ -1883,26 +1775,22 @@ CMyApplication::startAndMonitorOperation (void)
              * For this example we just ignore them.
              */
         }
-
-        /*
-         * Is it a tag report? If so, print it out.
-         */
-        else if(&CRO_ACCESS_REPORT::s_typeDescriptor == pType)
-        {
+            /*
+             * Is it a tag report? If so, print it out.
+             */
+        else if (&CRO_ACCESS_REPORT::s_typeDescriptor == pType) {
             CRO_ACCESS_REPORT * pNtf;
 
             pNtf = (CRO_ACCESS_REPORT *) pMessage;
 
             printTagReportData(pNtf);
         }
-
-        /*
-         * Hmmm. Something unexpected. Just tattle and keep going.
-         */
-        else
-        {
+            /*
+             * Hmmm. Something unexpected. Just tattle and keep going.
+             */
+        else {
             printf("WARNING: Ignored unexpected message during monitor: %s\n",
-                pType->m_pName);
+                    pType->m_pName);
         }
 
         /*
@@ -1914,18 +1802,14 @@ CMyApplication::startAndMonitorOperation (void)
     /*
      * Tattle about how things turned out.
      */
-    if(RetVal != 0)
-    {
+    if (RetVal != 0) {
         printf("ERROR: Inventory operation terminated (%d)\n", RetVal);
-    }
-    else if(m_Verbose)
-    {
+    } else if (m_Verbose) {
         printf("INFO: Inventory operation finished\n");
     }
 
     return RetVal;
 }
-
 
 /**
  *****************************************************************************
@@ -1942,11 +1826,10 @@ CMyApplication::startAndMonitorOperation (void)
  *****************************************************************************/
 
 void
-CMyApplication::printTagReportData (
-  CRO_ACCESS_REPORT *           pRO_ACCESS_REPORT)
-{
+CMyApplication::printTagReportData(
+        CRO_ACCESS_REPORT * pRO_ACCESS_REPORT) {
     std::list<CTagReportData *>::iterator Cur;
-    unsigned int                nEntry = 0;
+    unsigned int nEntry = 0;
 
     /*
      * Count the number of tag reports.
@@ -1956,8 +1839,7 @@ CMyApplication::printTagReportData (
     /*
      * If individual tag reports are not wanted, just return.
      */
-    if(m_Quiet)
-    {
+    if (m_Quiet) {
         return;
     }
 
@@ -1965,10 +1847,9 @@ CMyApplication::printTagReportData (
      * Loop through and count the number of entries
      */
     for (
-        Cur = pRO_ACCESS_REPORT->beginTagReportData();
-        Cur != pRO_ACCESS_REPORT->endTagReportData();
-        Cur++)
-    {
+            Cur = pRO_ACCESS_REPORT->beginTagReportData();
+            Cur != pRO_ACCESS_REPORT->endTagReportData();
+            Cur++) {
         nEntry++;
     }
 
@@ -1978,14 +1859,12 @@ CMyApplication::printTagReportData (
      * Loop through again and print each entry.
      */
     for (
-        Cur = pRO_ACCESS_REPORT->beginTagReportData();
-        Cur != pRO_ACCESS_REPORT->endTagReportData();
-        Cur++)
-    {
-        printOneTagReportData (*Cur);
+            Cur = pRO_ACCESS_REPORT->beginTagReportData();
+            Cur != pRO_ACCESS_REPORT->endTagReportData();
+            Cur++) {
+        printOneTagReportData(*Cur);
     }
 }
-
 
 /**
  *****************************************************************************
@@ -2001,41 +1880,36 @@ CMyApplication::printTagReportData (
  *****************************************************************************/
 
 void
-CMyApplication::printOneTagReportData (
-  CTagReportData *              pTagReportData)
-{
-    const CTypeDescriptor *     pType;
-    char                        aBuf[64];
+CMyApplication::printOneTagReportData(
+        CTagReportData * pTagReportData) {
+    const CTypeDescriptor * pType;
+    char aBuf[64];
 
     /*
      * Print the EPC. It could be an 96-bit EPC_96 parameter
      * or an variable length EPCData parameter.
      */
 
-    CParameter *                pEPCParameter =
-                                    pTagReportData->getEPCParameter();
+    CParameter * pEPCParameter =
+            pTagReportData->getEPCParameter();
 
-    if(NULL != pEPCParameter)
-    {
-        char *              p = aBuf;
-        llrp_u96_t          my_u96;
-        llrp_u1v_t          my_u1v;
-        llrp_u8_t *         pValue = NULL;
-        unsigned int        n, i;
+    if (NULL != pEPCParameter) {
+        char * p = aBuf;
+        llrp_u96_t my_u96;
+        llrp_u1v_t my_u1v;
+        llrp_u8_t * pValue = NULL;
+        unsigned int n, i;
 
         pType = pEPCParameter->m_pType;
-        if(&CEPC_96::s_typeDescriptor == pType)
-        {
-            CEPC_96             *pEPC_96;
+        if (&CEPC_96::s_typeDescriptor == pType) {
+            CEPC_96 *pEPC_96;
 
             pEPC_96 = (CEPC_96 *) pEPCParameter;
             my_u96 = pEPC_96->getEPC();
             pValue = my_u96.m_aValue;
             n = 12u;
-        }
-        else if(&CEPCData::s_typeDescriptor == pType)
-        {
-            CEPCData *          pEPCData;
+        } else if (&CEPCData::s_typeDescriptor == pType) {
+            CEPCData * pEPCData;
 
             pEPCData = (CEPCData *) pEPCParameter;
             my_u1v = pEPCData->getEPC();
@@ -2043,25 +1917,18 @@ CMyApplication::printOneTagReportData (
             n = (my_u1v.m_nBit + 7u) / 8u;
         }
 
-        if(NULL != pValue)
-        {
-            for(i = 0; i < n; i++)
-            {
-                if(0 < i && i%2 == 0)
-                {
+        if (NULL != pValue) {
+            for (i = 0; i < n; i++) {
+                if (0 < i && i % 2 == 0) {
                     *p++ = '-';
                 }
                 sprintf(p, "%02X", pValue[i]);
-                while(*p) p++;
+                while (*p) p++;
             }
-        }
-        else
-        {
+        } else {
             strcpy(aBuf, "---unknown-epc-data-type---");
         }
-    }
-    else
-    {
+    } else {
         strcpy(aBuf, "---missing-epc-data---");
     }
     printf("%-32s", aBuf);
@@ -2069,13 +1936,10 @@ CMyApplication::printOneTagReportData (
     /*
      * Print the antenna ID number
      */
-    if(NULL != pTagReportData->getAntennaID())
-    {
+    if (NULL != pTagReportData->getAntennaID()) {
         sprintf(aBuf, "ant%d",
-            pTagReportData->getAntennaID()->getAntennaID());
-    }
-    else
-    {
+                pTagReportData->getAntennaID()->getAntennaID());
+    } else {
         sprintf(aBuf, "ant?");
     }
     printf(" %-5s", aBuf);
@@ -2083,13 +1947,10 @@ CMyApplication::printOneTagReportData (
     /*
      * Print the peak RSSI
      */
-    if(NULL != pTagReportData->getPeakRSSI())
-    {
+    if (NULL != pTagReportData->getPeakRSSI()) {
         sprintf(aBuf, "%3ddBm",
-            pTagReportData->getPeakRSSI()->getPeakRSSI());
-    }
-    else
-    {
+                pTagReportData->getPeakRSSI()->getPeakRSSI());
+    } else {
         sprintf(aBuf, "  ?dBm");
     }
     printf(" %-7s", aBuf);
@@ -2097,13 +1958,10 @@ CMyApplication::printOneTagReportData (
     /*
      * Print the number of times the tag was seen
      */
-    if(NULL != pTagReportData->getTagSeenCount())
-    {
+    if (NULL != pTagReportData->getTagSeenCount()) {
         sprintf(aBuf, "%4dseen",
-            pTagReportData->getTagSeenCount()->getTagCount());
-    }
-    else
-    {
+                pTagReportData->getTagSeenCount()->getTagCount());
+    } else {
         sprintf(aBuf, "   ?seen");
     }
     printf(" %-8s", aBuf);
@@ -2113,7 +1971,6 @@ CMyApplication::printOneTagReportData (
      */
     printf("\n");
 }
-
 
 /**
  *****************************************************************************
@@ -2134,18 +1991,16 @@ CMyApplication::printOneTagReportData (
  *****************************************************************************/
 
 int
-CMyApplication::checkLLRPStatus (
-  CLLRPStatus *                 pLLRPStatus,
-  char *                        pWhatStr)
-{
+CMyApplication::checkLLRPStatus(
+        CLLRPStatus * pLLRPStatus,
+        char * pWhatStr) {
     /*
      * The LLRPStatus parameter is mandatory in all responses.
      * If it is missing there should have been a decode error.
      * This just makes sure (remember, this program is a
      * diagnostic and suppose to catch LTKC mistakes).
      */
-    if(NULL == pLLRPStatus)
-    {
+    if (NULL == pLLRPStatus) {
         printf("ERROR: %s missing LLRP status\n", pWhatStr);
         return -1;
     }
@@ -2157,21 +2012,17 @@ CMyApplication::checkLLRPStatus (
      * code. To get that, run this program with -vv
      * and examine the XML output.
      */
-    if(StatusCode_M_Success != pLLRPStatus->getStatusCode())
-    {
-        llrp_utf8v_t            ErrorDesc;
+    if (StatusCode_M_Success != pLLRPStatus->getStatusCode()) {
+        llrp_utf8v_t ErrorDesc;
 
         ErrorDesc = pLLRPStatus->getErrorDescription();
 
-        if(0 == ErrorDesc.m_nValue)
-        {
+        if (0 == ErrorDesc.m_nValue) {
             printf("ERROR: %s failed, no error description given\n",
-                pWhatStr);
-        }
-        else
-        {
+                    pWhatStr);
+        } else {
             printf("ERROR: %s failed, %.*s\n",
-                pWhatStr, ErrorDesc.m_nValue, ErrorDesc.m_pValue);
+                    pWhatStr, ErrorDesc.m_nValue, ErrorDesc.m_pValue);
         }
         return -2;
     }
@@ -2181,7 +2032,6 @@ CMyApplication::checkLLRPStatus (
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -2207,21 +2057,18 @@ CMyApplication::checkLLRPStatus (
  *****************************************************************************/
 
 CMessage *
-CMyApplication::transact (
-  CMessage *                    pSendMsg)
-{
-    CConnection *               pConn = m_pConnectionToReader;
-    CMessage *                  pRspMsg;
+CMyApplication::transact(
+        CMessage * pSendMsg) {
+    CConnection * pConn = m_pConnectionToReader;
+    CMessage * pRspMsg;
 
     /*
      * Print the XML text for the outbound message if
      * verbosity is 2 or higher.
      */
-    if(1 < m_Verbose)
-    {
+    if (1 < m_Verbose) {
         /* If -qq command option, do XML encode but don't actually print */
-        if(2 > m_Quiet)
-        {
+        if (2 > m_Quiet) {
             printf("\n===================================\n");
             printf("INFO: Transact sending\n");
         }
@@ -2235,24 +2082,21 @@ CMyApplication::transact (
      */
     pRspMsg = pConn->transact(pSendMsg, 5000);
 
-    if(NULL == pRspMsg)
-    {
-        const CErrorDetails *   pError = pConn->getTransactError();
+    if (NULL == pRspMsg) {
+        const CErrorDetails * pError = pConn->getTransactError();
 
         printf("ERROR: %s transact failed, %s\n",
-            pSendMsg->m_pType->m_pName,
-            pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
+                pSendMsg->m_pType->m_pName,
+                pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
 
-        if(NULL != pError->m_pRefType)
-        {
+        if (NULL != pError->m_pRefType) {
             printf("ERROR: ... reference type %s\n",
-                pError->m_pRefType->m_pName);
+                    pError->m_pRefType->m_pName);
         }
 
-        if(NULL != pError->m_pRefField)
-        {
+        if (NULL != pError->m_pRefField) {
             printf("ERROR: ... reference field %s\n",
-                pError->m_pRefField->m_pName);
+                    pError->m_pRefField->m_pName);
         }
 
         return NULL;
@@ -2262,11 +2106,9 @@ CMyApplication::transact (
      * Print the XML text for the inbound message if
      * verbosity is 2 or higher.
      */
-    if(1 < m_Verbose)
-    {
+    if (1 < m_Verbose) {
         /* If -qq command option, do XML encode but don't actually print */
-        if(2 > m_Quiet)
-        {
+        if (2 > m_Quiet) {
             printf("\n- - - - - - - - - - - - - - - - - -\n");
             printf("INFO: Transact received response\n");
         }
@@ -2278,21 +2120,19 @@ CMyApplication::transact (
      * when it can't understand the request), tattle
      * and declare defeat.
      */
-    if(&CERROR_MESSAGE::s_typeDescriptor == pRspMsg->m_pType)
-    {
+    if (&CERROR_MESSAGE::s_typeDescriptor == pRspMsg->m_pType) {
         const CTypeDescriptor * pResponseType;
 
         pResponseType = pSendMsg->m_pType->m_pResponseType;
 
         printf("ERROR: Received ERROR_MESSAGE instead of %s\n",
-            pResponseType->m_pName);
+                pResponseType->m_pName);
         delete pRspMsg;
         pRspMsg = NULL;
     }
 
     return pRspMsg;
 }
-
 
 /**
  *****************************************************************************
@@ -2319,11 +2159,10 @@ CMyApplication::transact (
  *****************************************************************************/
 
 CMessage *
-CMyApplication::recvMessage (
-  int                           nMaxMS)
-{
-    CConnection *               pConn = m_pConnectionToReader;
-    CMessage *                  pMessage;
+CMyApplication::recvMessage(
+        int nMaxMS) {
+    CConnection * pConn = m_pConnectionToReader;
+    CMessage * pMessage;
 
     /*
      * Receive the message subject to a time limit
@@ -2334,23 +2173,20 @@ CMyApplication::recvMessage (
      * If LLRP::CConnection::recvMessage() returns NULL then there was
      * an error. In that case we try to print the error details.
      */
-    if(NULL == pMessage)
-    {
-        const CErrorDetails *   pError = pConn->getRecvError();
+    if (NULL == pMessage) {
+        const CErrorDetails * pError = pConn->getRecvError();
 
         printf("ERROR: recvMessage failed, %s\n",
-            pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
+                pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
 
-        if(NULL != pError->m_pRefType)
-        {
+        if (NULL != pError->m_pRefType) {
             printf("ERROR: ... reference type %s\n",
-                pError->m_pRefType->m_pName);
+                    pError->m_pRefType->m_pName);
         }
 
-        if(NULL != pError->m_pRefField)
-        {
+        if (NULL != pError->m_pRefField) {
             printf("ERROR: ... reference field %s\n",
-                pError->m_pRefField->m_pName);
+                    pError->m_pRefField->m_pName);
         }
 
         return NULL;
@@ -2360,11 +2196,9 @@ CMyApplication::recvMessage (
      * Print the XML text for the inbound message if
      * verbosity is 2 or higher.
      */
-    if(1 < m_Verbose)
-    {
+    if (1 < m_Verbose) {
         /* If -qq command option, do XML encode but don't actually print */
-        if(2 > m_Quiet)
-        {
+        if (2 > m_Quiet) {
             printf("\n===================================\n");
             printf("INFO: Message received\n");
         }
@@ -2373,7 +2207,6 @@ CMyApplication::recvMessage (
 
     return pMessage;
 }
-
 
 /**
  *****************************************************************************
@@ -2393,20 +2226,17 @@ CMyApplication::recvMessage (
  *****************************************************************************/
 
 int
-CMyApplication::sendMessage (
-  CMessage *                    pSendMsg)
-{
-    CConnection *               pConn = m_pConnectionToReader;
+CMyApplication::sendMessage(
+        CMessage * pSendMsg) {
+    CConnection * pConn = m_pConnectionToReader;
 
     /*
      * Print the XML text for the outbound message if
      * verbosity is 2 or higher.
      */
-    if(1 < m_Verbose)
-    {
+    if (1 < m_Verbose) {
         /* If -qq command option, do XML encode but don't actually print */
-        if(2 > m_Quiet)
-        {
+        if (2 > m_Quiet) {
             printf("\n===================================\n");
             printf("INFO: Sending\n");
         }
@@ -2418,24 +2248,21 @@ CMyApplication::sendMessage (
      * then there was an error. In that case we try to print
      * the error details.
      */
-    if(RC_OK != pConn->sendMessage(pSendMsg))
-    {
-        const CErrorDetails *   pError = pConn->getSendError();
+    if (RC_OK != pConn->sendMessage(pSendMsg)) {
+        const CErrorDetails * pError = pConn->getSendError();
 
         printf("ERROR: %s sendMessage failed, %s\n",
-            pSendMsg->m_pType->m_pName,
-            pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
+                pSendMsg->m_pType->m_pName,
+                pError->m_pWhatStr ? pError->m_pWhatStr : "no reason given");
 
-        if(NULL != pError->m_pRefType)
-        {
+        if (NULL != pError->m_pRefType) {
             printf("ERROR: ... reference type %s\n",
-                pError->m_pRefType->m_pName);
+                    pError->m_pRefType->m_pName);
         }
 
-        if(NULL != pError->m_pRefField)
-        {
+        if (NULL != pError->m_pRefField) {
             printf("ERROR: ... reference field %s\n",
-                pError->m_pRefField->m_pName);
+                    pError->m_pRefField->m_pName);
         }
 
         return -1;
@@ -2446,7 +2273,6 @@ CMyApplication::sendMessage (
      */
     return 0;
 }
-
 
 /**
  *****************************************************************************
@@ -2462,10 +2288,9 @@ CMyApplication::sendMessage (
  *****************************************************************************/
 
 void
-CMyApplication::printXMLMessage (
-  CMessage *                    pMessage)
-{
-    char                        aBuf[100*1024];
+CMyApplication::printXMLMessage(
+        CMessage * pMessage) {
+    char aBuf[100 * 1024];
 
     /*
      * Convert the message to an XML string.
@@ -2483,8 +2308,7 @@ CMyApplication::printXMLMessage (
      * so the CPU utilization of XMLTextEncoder can be measured
      * without the noise.
      */
-    if(2 > m_Quiet)
-    {
+    if (2 > m_Quiet) {
         printf("%s", aBuf);
     }
 }

@@ -538,7 +538,7 @@ class <xsl:value-of select='$ClassName'/> : public <xsl:value-of select='$ClassB
   <xsl:param name='MemberName'/>
   <xsl:param name='BaseName'/>
   protected:
-    <xsl:value-of select='$FieldType'/> <xsl:value-of select='$MemberName'/>;
+    <xsl:value-of select='$FieldType'/><xsl:text> </xsl:text><xsl:value-of select='$MemberName'/>;
 
 /** @name Internal Framework Functions */
 //@{

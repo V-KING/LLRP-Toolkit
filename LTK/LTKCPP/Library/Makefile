@@ -18,7 +18,7 @@
 #CPPFLAGS = -O -Wall
 AR              = ar
 CXX             = g++
-CPPFLAGS        = -g -Wall -I../../opensource/include/libxml2
+CPPFLAGS        = -std=c++14 -g -Wall -I/usr/include/libxml2 -Dlinux
 
 LLRPDEF         = ../../Definitions/Core/llrp-1x0-def.xml
 

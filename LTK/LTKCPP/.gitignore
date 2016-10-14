@@ -1,0 +1,15 @@
+*.a
+*.o
+
+nbproject
+
+Examples/example1
+
+Library/out_ltkcpp.h
+Library/out_ltkcpp.inc
+Library/LLRP.org/out_llrporg_ltkcpp.h
+Library/LLRP.org/out_llrporg_ltkcpp.inc
+
+Tests/dx201
+Tests/llrp2xml
+Tests/xml2llrp
