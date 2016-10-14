@@ -51,13 +51,11 @@
  **
  *****************************************************************************/
 
-
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 #include <stdio.h>
 
 #include "ltkcpp.h"
-#include "libxml/parser.h"
-#include "libxml/tree.h"
-
 
 using namespace LLRP;
 
@@ -67,8 +65,8 @@ using namespace LLRP;
 #define FRAME_BUF_SIZE          (4u*1024u*1024u)
 
 /* This is the message format that is agreed upon when messages fail
-** to decode. It's somewhat arbitrary, but allows us to do easy
-** comparisons */
+ ** to decode. It's somewhat arbitrary, but allows us to do easy
+ ** comparisons */
 const char * errMsgStr = "<ERROR_MESSAGE MessageID=\"0\" Version=\"0\">\n" \
                          "  <LLRPStatus>\n" \
                          "    <StatusCode>M_Success</StatusCode>\n" \
@@ -77,11 +75,11 @@ const char * errMsgStr = "<ERROR_MESSAGE MessageID=\"0\" Version=\"0\">\n" \
                          "</ERROR_MESSAGE>\n";
 
 /* the corresponding binary packet */
-unsigned char errMsgBinary[18] = {0x04, 0x64, 0x00, 0x00, 
-                                  0x00, 0x12, 0x00, 0x00, 
-                                  0x00, 0x00, 0x01, 0x1F, 
-                                  0x00, 0x08, 0x00, 0x00, 
-                                  0x00, 0x00};
+unsigned char errMsgBinary[18] = {0x04, 0x64, 0x00, 0x00,
+    0x00, 0x12, 0x00, 0x00,
+    0x00, 0x00, 0x01, 0x1F,
+    0x00, 0x08, 0x00, 0x00,
+    0x00, 0x00};
 
 /**
  *****************************************************************************
@@ -99,18 +97,16 @@ unsigned char errMsgBinary[18] = {0x04, 0x64, 0x00, 0x00,
  *****************************************************************************/
 
 int
-main (int ac, char *av[])
-{
-    CTypeRegistry *             pTypeRegistry;
-    CXMLTextDecoder *           pDecoder;
-    CMessage *                  pMessage;
-    xmlDoc*                     pDoc;
-    xmlNode*                    pNode;
+main(int ac, char *av[]) {
+    CTypeRegistry * pTypeRegistry;
+    CXMLTextDecoder * pDecoder;
+    CMessage * pMessage;
+    xmlDoc* pDoc;
+    xmlNode* pNode;
     /*
      * Check arg count
      */
-    if(ac != 2)
-    {
+    if (ac != 2) {
         fprintf(stderr, "ERROR: Bad usage\nusage: %s INPUTFILE\n", av[0]);
         exit(1);
     }
@@ -127,12 +123,11 @@ main (int ac, char *av[])
     /* set the line numbers for error reporting */
     xmlLineNumbersDefault(1);
 
-    pDoc = xmlReadFile(av[1], 
-                       NULL, 
-                       XML_PARSE_COMPACT | XML_PARSE_NONET);
+    pDoc = xmlReadFile(av[1],
+            NULL,
+            XML_PARSE_COMPACT | XML_PARSE_NONET);
 
-    if(NULL == pDoc)
-    {
+    if (NULL == pDoc) {
         fprintf(stderr, "ERROR: Could not read XML File\n");
         delete pTypeRegistry;
         xmlCleanupParser();
@@ -142,13 +137,11 @@ main (int ac, char *av[])
     pNode = xmlDocGetRootElement(pDoc);
 
     /* find the first element node and make sure its PS */
-    while((pNode) && (XML_ELEMENT_NODE != pNode->type))
-    {
+    while ((pNode) && (XML_ELEMENT_NODE != pNode->type)) {
         pNode = pNode->next;
     }
 
-    if(NULL == pNode)
-    {
+    if (NULL == pNode) {
         fprintf(stderr, "ERROR: Could not get XML PacketSequence node.  " \
                         "Found no top-level Element nodes \n");
         delete pTypeRegistry;
@@ -156,8 +149,7 @@ main (int ac, char *av[])
         exit(3);
     }
 
-    if(strcmp((const char*) pNode->name, "packetSequence") != 0)
-    {
+    if (strcmp((const char*) pNode->name, "packetSequence") != 0) {
         fprintf(stderr, "ERROR: Could not get XML PacketSequence node.  " \
                         "Found %s instead\n", pNode->name);
         xmlFreeDoc(pDoc);
@@ -165,18 +157,16 @@ main (int ac, char *av[])
         delete pTypeRegistry;
         exit(4);
     }
-    
+
     /* not sure this is necessary */
     freopen(NULL, "wb", stdout);
 
     /* packets are all children of the first node */
     pNode = pNode->children;
-  
-    while(pNode != NULL)
-    {
-        if(XML_ELEMENT_NODE == pNode->type)
-        {
-            xmlChar *           pMessageIDStr = NULL;
+
+    while (pNode != NULL) {
+        if (XML_ELEMENT_NODE == pNode->type) {
+            xmlChar * pMessageIDStr = NULL;
 
             /* It helps to know the message ID for debugging */
             pMessageIDStr = xmlGetProp(pNode, (const xmlChar*) "MessageID");
@@ -191,75 +181,66 @@ main (int ac, char *av[])
              * Now ask the frame decoder to actually decode
              * the message. It returns NULL for an error.
              */
-             pMessage = pDecoder->decodeMessage();
+            pMessage = pDecoder->decodeMessage();
 
             /*
              * Did the decode fail?
              */
-            if(NULL == pMessage)
-            {
+            if (NULL == pMessage) {
                 const CErrorDetails *pError;
- 
+
                 /* encode error message as binary */
-                fwrite(errMsgBinary, 1, sizeof(errMsgBinary), stdout);
+                fwrite(errMsgBinary, 1, sizeof (errMsgBinary), stdout);
 
                 pError = &pDecoder->m_ErrorDetails;
- 
+
 #ifdef XML2LLRP_DEBUG
                 fprintf(stderr, "ERROR: Decoder error, result=%d\n",
                         pError->m_eResultCode);
 
-                if(NULL != pMessageIDStr)
-                {
-                    fprintf(stderr, "ERROR ... MessageID=%s\n", 
-                           pMessageIDStr);
+                if (NULL != pMessageIDStr) {
+                    fprintf(stderr, "ERROR ... MessageID=%s\n",
+                            pMessageIDStr);
                 }
-                if(NULL != pError->m_pRefType)
-                { 
+                if (NULL != pError->m_pRefType) {
                     fprintf(stderr, "ERROR ... refType=%s\n",
-                           pError->m_pRefType->m_pName);
+                            pError->m_pRefType->m_pName);
                 }
-                if(NULL != pError->m_pRefField)
-                {
+                if (NULL != pError->m_pRefField) {
                     fprintf(stderr, "ERROR ... refField=%s\n",
-                           pError->m_pRefField->m_pName);
+                            pError->m_pRefField->m_pName);
                 }
-                if(NULL != pError->m_pWhatStr)
-                {
+                if (NULL != pError->m_pWhatStr) {
                     fprintf(stderr, "ERROR ... whatStr=%s\n",
-                           pError->m_pWhatStr); 
+                            pError->m_pWhatStr);
                 }
-                if(0 != pError->m_OtherDetail)
-                {
-                    fprintf(stderr, "ERROR ... XML line number %d\n", 
+                if (0 != pError->m_OtherDetail) {
+                    fprintf(stderr, "ERROR ... XML line number %d\n",
                             pError->m_OtherDetail);
                 }
 #endif /* XML2LLRP_DEBUG */
 
                 delete pDecoder;
                 xmlFree(pMessageIDStr);
-            }
-            else
-            {
-                unsigned char           aOutBuffer[FRAME_BUF_SIZE];
-                unsigned int            nOutBuffer;
-                CFrameEncoder *         pEncoder;
+            } else {
+                unsigned char aOutBuffer[FRAME_BUF_SIZE];
+                unsigned int nOutBuffer;
+                CFrameEncoder * pEncoder;
 
 #ifdef XML2LLRP_DEBUG
-                if(NULL == pMessageIDStr)
-                {
+                if (NULL == pMessageIDStr) {
                     pMessageIDStr = (xmlChar*) "unknown";
                 }
-                fprintf(stderr, "SUCCESS ... MessageID=%s passed encoding\n", 
+                fprintf(stderr, "SUCCESS ... MessageID=%s passed encoding\n",
                         pMessageIDStr);
 
 #endif  /* XML2LLRP_DEBUG */
 
                 xmlFree(pMessageIDStr);
                 delete pDecoder;
-                
+
                 /* encode the message as binary */
- 
+
                 /*
                  * Zero fill the buffer to make things easier
                  * on the debugger.
@@ -270,8 +251,8 @@ main (int ac, char *av[])
                  * Construct a frame encoder. It references
                  * the output buffer and knows the maximum size.
                  */
-                pEncoder = new CFrameEncoder(aOutBuffer, 
-                                             sizeof aOutBuffer);
+                pEncoder = new CFrameEncoder(aOutBuffer,
+                        sizeof aOutBuffer);
 
                 /*
                  * Do the encode.
@@ -287,33 +268,28 @@ main (int ac, char *av[])
                 /*
                  * Check the status, tattle on errors
                  */
-                if(RC_OK != pEncoder->m_ErrorDetails.m_eResultCode)
-                {
+                if (RC_OK != pEncoder->m_ErrorDetails.m_eResultCode) {
                     const CErrorDetails *pError;
 
                     pError = &pEncoder->m_ErrorDetails;
 
                     /* encode error message as binary */
-                    fwrite(errMsgBinary,1, sizeof(errMsgBinary), stdout);
+                    fwrite(errMsgBinary, 1, sizeof (errMsgBinary), stdout);
 
 #ifdef XML2LLRP_DEBUG
                     fprintf(stderr, "Failed to Encode XML message\n");
                     fprintf(stderr, "ERROR: Encoder error, status=%d\n",
                             pError->m_eResultCode);
-                    if(NULL != pError->m_pRefType)
-                    {
+                    if (NULL != pError->m_pRefType) {
                         fprintf(stderr, "ERROR ... refType=%s\n",
                                 pError->m_pRefType->m_pName);
                     }
-                    if(NULL != pError->m_pRefField)
-                    {
+                    if (NULL != pError->m_pRefField) {
                         fprintf(stderr, "ERROR ... refField=%s\n",
                                 pError->m_pRefField->m_pName);
                     }
 #endif /* XML2LLRP_DEBUG */
-                }
-                else
-                {
+                } else {
                     fwrite(aOutBuffer, 1, nOutBuffer, stdout);
                 }
 

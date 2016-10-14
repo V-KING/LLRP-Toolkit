@@ -5,10 +5,10 @@ nbproject
 
 Examples/example1
 
-Library/out_ltkc.h
-Library/out_ltkc.inc
-Library/LLRP.org/out_llrporg_ltkc.h
-Library/LLRP.org/out_llrporg_ltkc.inc
+Library/out_ltkcpp.h
+Library/out_ltkcpp.inc
+Library/LLRP.org/out_llrporg_ltkcpp.h
+Library/LLRP.org/out_llrporg_ltkcpp.inc
 
 Tests/dx201
 Tests/llrp2xml

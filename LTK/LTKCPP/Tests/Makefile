@@ -16,16 +16,17 @@
 ############################################################################
 
 LIBDIR=../Library
-XML2DIR=../../opensource/include/libxml2
+XML2DIR=/usr/include/libxml2
 INCL = -I$(LIBDIR) -I$(XML2DIR)
 
 #CPPFLAGS = -O -Wall $(INCL)
 AR              = ar
 CXX             = g++
-CPPFLAGS        = -g -Wall $(INCL)
+CPPFLAGS        = -std=c++14 -g -Wall $(INCL) -Dlinux
 
 LTKCPP_LIB = $(LIBDIR)/libltkcpp.a
-XML2_LIB = ../../opensource/lib/libxml2.a
+#XML2_LIB = ../../opensource/lib/libxml2.a
+XML2_LIB = -lxml2
 LTKCPP_HDRS = \
 	$(LIBDIR)/ltkcpp.h		\
 	$(LIBDIR)/ltkcpp_base.h		\

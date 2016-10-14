@@ -26,7 +26,8 @@
  ** @brief  Class for handling two-way LLRP message traffic
  **
  *****************************************************************************/
- 
+
+#include <ctime>
 
 namespace LLRP
 {

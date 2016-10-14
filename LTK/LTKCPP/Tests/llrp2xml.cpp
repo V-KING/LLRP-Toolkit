@@ -52,8 +52,8 @@
  **
  *****************************************************************************/
 
-
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "ltkcpp.h"
 
@@ -68,51 +68,49 @@ using namespace LLRP;
 
 /* forward declaration */
 void
-dump (
-  unsigned char *               pBuffer,
-  unsigned int                  nBuffer);
+dump(
+        unsigned char * pBuffer,
+        unsigned int nBuffer);
 
 
 /*
  * XML header and footer enclosing the sequence of messages.
  */
 static char
-g_aPacketSequenceHeader[] =
-{
-  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-  "\n"
-  "<ps:packetSequence\n"
-  "  xmlns='http://www.llrp.org/ltk/schema/core/encoding/xml/1.0'\n"
-  "  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
-  "  xmlns:ps='http://www.llrp.org/ltk/schema/testing/encoding/xml/0.6'\n"
-  "  xsi:schemaLocation='http://www.llrp.org/ltk/schema/core/encoding/xml/1.0\n"
-  "                      http://www.llrp.org/ltk/schema/core/encoding/xml/1.0/llrp.xsd\n'>"
-                        
+g_aPacketSequenceHeader[] = {
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "\n"
+    "<ps:packetSequence\n"
+    "  xmlns='http://www.llrp.org/ltk/schema/core/encoding/xml/1.0'\n"
+    "  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n"
+    "  xmlns:ps='http://www.llrp.org/ltk/schema/testing/encoding/xml/0.6'\n"
+    "  xsi:schemaLocation='http://www.llrp.org/ltk/schema/core/encoding/xml/1.0\n"
+    "                      http://www.llrp.org/ltk/schema/core/encoding/xml/1.0/llrp.xsd\n'>"
+
 };
 
 static char
-g_aPacketSequenceFooter[] =
-{
-  "\n</ps:packetSequence>\n"
+g_aPacketSequenceFooter[] = {
+    "\n</ps:packetSequence>\n"
 };
 
 /* This is the message format that is agreed upon when messages fail
-** to decode. It's somewhat arbitrary, but allows us to do easy
-** comparisons */
-static char * g_errMsgStr = "<ERROR_MESSAGE MessageID=\"0\" Version=\"0\">\n" \
+ ** to decode. It's somewhat arbitrary, but allows us to do easy
+ ** comparisons */
+static char g_errMsgStr[] = R"foo(<ERROR_MESSAGE MessageID=\"0\" Version=\"0\">\n" \
                             "  <LLRPStatus>\n" \
                             "    <StatusCode>M_Success</StatusCode>\n" \
                             "    <ErrorDescription></ErrorDescription>\n" \
                             "  </LLRPStatus>\n" \
-                            "</ERROR_MESSAGE>\n";
+                            "</ERROR_MESSAGE>\n)foo";
 
 /*
  * These used to be allocated as local (auto) variables.
  * But they are really, really big and Linux has a 10mb
  * stack limit. So they had to be moved here.
  */
-unsigned char                   aInBuffer[FRAME_BUF_SIZE];
-char                            aXMLTextBuf[XML_TEXT_BUF_SIZE];
+unsigned char aInBuffer[FRAME_BUF_SIZE];
+char aXMLTextBuf[XML_TEXT_BUF_SIZE];
 
 /**
  *****************************************************************************
@@ -130,16 +128,14 @@ char                            aXMLTextBuf[XML_TEXT_BUF_SIZE];
  *****************************************************************************/
 
 int
-main (int ac, char *av[])
-{
-    CTypeRegistry *             pTypeRegistry;
-    FILE *                      infp;
+main(int ac, char *av[]) {
+    CTypeRegistry * pTypeRegistry;
+    FILE * infp;
 
     /*
      * Check arg count
      */
-    if(ac != 2)
-    {
+    if (ac != 2) {
         fprintf(stderr, "ERROR: Bad usage\nusage: %s INPUTFILE\n", av[0]);
         exit(1);
     }
@@ -152,8 +148,7 @@ main (int ac, char *av[])
 #else
     infp = fopen(av[1], "r");
 #endif
-    if(NULL == infp)
-    {
+    if (NULL == infp) {
         perror(av[1]);
         exit(2);
     }
@@ -168,11 +163,10 @@ main (int ac, char *av[])
     /*
      * Loop iterates for each input frame
      */
-    for(;;)
-    {
-//        unsigned char           aInBuffer[FRAME_BUF_SIZE];
-        unsigned int            nInBuffer = sizeof aInBuffer;
-        bool                    bEOF;
+    for (;;) {
+        //        unsigned char           aInBuffer[FRAME_BUF_SIZE];
+        unsigned int nInBuffer = sizeof aInBuffer;
+        bool bEOF;
 
         /*
          * Zero fill the buffer to make things easier
@@ -190,15 +184,14 @@ main (int ac, char *av[])
          * Loop iterates for each individual file read.
          * The size of each read is guided by LLRP_FrameExtract.
          */
-        for(;;)
-        {
+        for (;;) {
             /*
              * Ask LLRP_FrameExtract() how we are doing
              * on building a frame. It'll tell us the
              * status and possibly the number of bytes
              * still needed.
              */
-            CFrameExtract       MyFrameExtract(aInBuffer, nInBuffer);
+            CFrameExtract MyFrameExtract(aInBuffer, nInBuffer);
 
             /*
              * If there is a framing error we have to declare
@@ -207,8 +200,7 @@ main (int ac, char *av[])
              * the input file is bad or that the extract
              * function is broken.
              */
-            if(CFrameExtract::FRAME_ERROR == MyFrameExtract.m_eStatus)
-            {
+            if (CFrameExtract::FRAME_ERROR == MyFrameExtract.m_eStatus) {
                 fprintf(stderr, "ERROR: Frame error, bail!\n");
                 bEOF = TRUE;
                 break;
@@ -221,24 +213,20 @@ main (int ac, char *av[])
              * LLRP_FrameExtract() can determine the actual
              * size of the frame.
              */
-            if(CFrameExtract::NEED_MORE == MyFrameExtract.m_eStatus)
-            {
-                int             rc;
+            if (CFrameExtract::NEED_MORE == MyFrameExtract.m_eStatus) {
+                int rc;
 
                 if (sizeof aInBuffer <
-                        nInBuffer + MyFrameExtract.m_nBytesNeeded)
-                {
-                    fprintf(stderr,"Input frame too big\n");
+                        nInBuffer + MyFrameExtract.m_nBytesNeeded) {
+                    fprintf(stderr, "Input frame too big\n");
                     exit(3);
                 }
 
-                rc = (int)fread(&aInBuffer[nInBuffer], 1u,
-                            MyFrameExtract.m_nBytesNeeded, infp);
-                if(rc <= 0)
-                {
-                    if(ferror(infp))
-                    {
-                        fprintf(stderr,"ERROR: bad file read status\n");
+                rc = (int) fread(&aInBuffer[nInBuffer], 1u,
+                        MyFrameExtract.m_nBytesNeeded, infp);
+                if (rc <= 0) {
+                    if (ferror(infp)) {
+                        fprintf(stderr, "ERROR: bad file read status\n");
                     }
                     bEOF = TRUE;
                     break;
@@ -253,8 +241,7 @@ main (int ac, char *av[])
              * This probably means that the frame extract
              * function is broken.
              */
-            if(CFrameExtract::READY != MyFrameExtract.m_eStatus)
-            {
+            if (CFrameExtract::READY != MyFrameExtract.m_eStatus) {
                 fprintf(stderr, "ERROR: Unrecognized extract status, bail!\n");
                 bEOF = TRUE;
                 break;
@@ -267,56 +254,51 @@ main (int ac, char *av[])
          * Did the inner loop detect and end-of-file or other
          * reason to stop?
          */
-        if(bEOF)
-        {
-            if(0 < nInBuffer)
-            {
+        if (bEOF) {
+            if (0 < nInBuffer) {
                 fprintf(stderr, "ERROR: EOF w/ %u bytes in buffer\n", nInBuffer);
             }
             break;
         }
 
         /* Put a blank line between messages */
-        printf ("\n");
+        printf("\n");
 
         /*
          * Construct a frame decoder. It references the
          * type registry and the input buffer.
          */
-        CFrameDecoder           MyFrameDecoder(pTypeRegistry,
-                                        aInBuffer, nInBuffer);
+        CFrameDecoder MyFrameDecoder(pTypeRegistry,
+                aInBuffer, nInBuffer);
 
         /*
          * Now ask the frame decoder to actually decode
          * the message. It returns NULL for an error.
          */
-        CMessage *              pMessage;
+        CMessage * pMessage;
 
         pMessage = MyFrameDecoder.decodeMessage();
 
         /*
          * Did the decode fail?
          */
-        if(NULL == pMessage)
-        {
+        if (NULL == pMessage) {
             const CErrorDetails *pError;
 
             pError = &MyFrameDecoder.m_ErrorDetails;
 
             fprintf(stderr, "ERROR: Decoder error, result=%d\n",
-                pError->m_eResultCode);
-            if(NULL != pError->m_pRefType)
-            {
+                    pError->m_eResultCode);
+            if (NULL != pError->m_pRefType) {
                 fprintf(stderr, "ERROR ... refType=%s\n",
-                    pError->m_pRefType->m_pName);
+                        pError->m_pRefType->m_pName);
             }
-            if(NULL != pError->m_pRefField)
-            {
+            if (NULL != pError->m_pRefField) {
                 fprintf(stderr, "ERROR ... refField=%s\n",
-                    pError->m_pRefField->m_pName);
+                        pError->m_pRefField->m_pName);
             }
 
-	    printf("%s\n", g_errMsgStr);
+            printf("%s\n", g_errMsgStr);
 
             continue;
         }
@@ -330,20 +312,17 @@ main (int ac, char *av[])
          * Print as XML text the LLRP message to stdout.
          */
         {
-            CXMLTextEncoder     MyXMLEncoder(aXMLTextBuf, sizeof aXMLTextBuf);
+            CXMLTextEncoder MyXMLEncoder(aXMLTextBuf, sizeof aXMLTextBuf);
 
             MyXMLEncoder.encodeElement(pMessage);
-            if(!MyXMLEncoder.m_bOverflow)
-            {
+            if (!MyXMLEncoder.m_bOverflow) {
                 printf("%s", aXMLTextBuf);
-            }
-            else
-            {
+            } else {
                 fprintf(stderr, "<!-- Buffer overflow -->\n");
-	        printf("%s\n", g_errMsgStr);
+                printf("%s\n", g_errMsgStr);
             }
         }
-    
+
         delete pMessage;
     }
 
@@ -385,24 +364,20 @@ main (int ac, char *av[])
  *****************************************************************************/
 
 void
-dump (
-  unsigned char *               pBuffer,
-  unsigned int                  nBuffer)
-{
-    unsigned int                chk = 0;
-    unsigned int                i;
+dump(
+        unsigned char * pBuffer,
+        unsigned int nBuffer) {
+    unsigned int chk = 0;
+    unsigned int i;
 
-    for(i = 0; i < nBuffer; i++)
-    {
-        if(i%4 == 0)
-        {
+    for (i = 0; i < nBuffer; i++) {
+        if (i % 4 == 0) {
             printf(" ");
         }
         printf(" %02X", pBuffer[i]);
         chk += pBuffer[i];
 
-        if(i%16 == 15)
-        {
+        if (i % 16 == 15) {
             printf("  sum=%03X\n", chk);
             chk = 0;
         }
