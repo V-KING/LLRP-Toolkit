@@ -16,8 +16,13 @@
 ############################################################################
 
 #CFLAGS = -O -Wall
-AR              = ar
-CC              = gcc
+
+ifeq ($(Processor), ps7_cortexa9_1)
+CROSS_COMPILE :=/tools/Xilinx/SDK/2018.3/gnu/aarch32/lin/gcc-arm-none-eabi/bin/arm-none-eabi-
+endif
+
+AR              = $(CROSS_COMPILE)ar
+CC              = $(CROSS_COMPILE)gcc
 CFLAGS          = -g -Wall
 CINCLUDES	= -I /usr/include/libxml2
 
@@ -39,7 +44,6 @@ LTKC_HDRS = \
 LTKC_LIB = libltkc.a
 LTKC_OBJS = \
 	ltkc_array.o		\
-	ltkc_connection.o	\
 	ltkc_element.o		\
 	ltkc_encdec.o		\
 	ltkc_error.o		\
@@ -47,10 +51,16 @@ LTKC_OBJS = \
 	ltkc_frameencode.o	\
 	ltkc_frameextract.o	\
 	ltkc_hdrfd.o		\
-	ltkc_xmltextencode.o	\
-	ltkc_xmltextdecode.o	\
 	ltkc_typeregistry.o	\
 	ltkc_genout.o
+
+ifeq ($(Processor), ps7_cortexa9_1)
+CFLAGS += -O2 -c -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -nostartfiles -g -Wall -Wextra
+else
+LTKC_OBJS += ltkc_xmltextencode.o
+LTKC_OBJS += ltkc_xmltextdecode.o
+LTKC_OBJS += ltkc_connection.o
+endif
 
 
 all:    $(LTKC_LIB)
@@ -125,7 +135,12 @@ out_ltkc.inc: ltkc_gen_c.xslt $(LLRPDEF)
 	xsltproc --stringparam RegistryName Core \
 		-o out_ltkc.inc ltkc_gen_c.xslt $(LLRPDEF)
 
+ps7_cortexa9_1:
+	make all Processor=ps7_cortexa9_1
 clean:
+	rm -f *.o *.core core.[0-9]*
+	rm -f *.a
+clean_orign:
 	rm -f *.o *.core core.[0-9]*
 	rm -f out_*.inc out_*.h
 	rm -f *.a
