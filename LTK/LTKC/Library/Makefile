@@ -56,6 +56,7 @@ LTKC_OBJS = \
 
 ifeq ($(Processor), ps7_cortexa9_1)
 CFLAGS += -O2 -c -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -nostartfiles -g -Wall -Wextra
+# LTKC_OBJS += ltkc_connection2.o
 else
 LTKC_OBJS += ltkc_xmltextencode.o
 LTKC_OBJS += ltkc_xmltextdecode.o
